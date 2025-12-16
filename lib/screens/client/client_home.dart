@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 
 class ClientHome extends StatelessWidget {
@@ -7,29 +9,31 @@ class ClientHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Inicio - Cliente"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              authProvider.logout();
+              context.go("/login");
+            },
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Bienvenido",
-              style: TextStyle(
+            Text(
+              "Hola, ${authProvider.user?.name ?? 'Cliente'}",
+              style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            const Text(
-              "Aquí podrás ver productos, reservar citas y más.",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
               ),
             ),
 
@@ -37,28 +41,14 @@ class ClientHome extends StatelessWidget {
 
             CustomButton(
               text: "Ver Catálogo",
-              onPressed: () {
-                context.push("/client/catalog");
-              },
+              onPressed: () => context.push("/client/catalog"),
             ),
 
             const SizedBox(height: 15),
 
             CustomButton(
               text: "Reservar Cita",
-              onPressed: () {
-                context.push("/client/book");
-              },
-            ),
-
-            const SizedBox(height: 15),
-
-            CustomButton(
-              text: "Cerrar Sesión",
-              isPrimary: false,
-              onPressed: () {
-                context.go("/login");
-              },
+              onPressed: () => context.push("/client/book"),
             ),
           ],
         ),

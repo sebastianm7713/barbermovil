@@ -102,19 +102,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              // Botón Login
               CustomButton(
                 text: "Iniciar sesión",
                 onPressed: () {
                   final email = emailController.text.trim();
                   final password = passwordController.text.trim();
 
-                  // ✅ Validación contra mockUsers
-                  final matches = mockUsers.where(
-                    (u) => u.email == email && u.password == password,
-                  );
+                  final user = authProvider.login(email, password);
 
-                  if (matches.isEmpty) {
+                  if (user == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Credenciales incorrectas"),
@@ -124,17 +120,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     return;
                   }
 
-                  final User user = matches.first;
-
-                  // Guardamos usuario en provider
-                  authProvider.login(user);
-
-                  // Redirección según rol
+                  // 🔁 Redirección según rol
                   switch (user.role) {
                     case "admin":
                       context.go("/admin/dashboard");
                       break;
-                    case "employee": // Barbero
+                    case "employee":
                       context.go("/employee/home");
                       break;
                     case "client":
@@ -145,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 },
               ),
-              const SizedBox(height: 26),
+
 
               // Registro
               GestureDetector(

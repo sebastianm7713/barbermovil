@@ -183,27 +183,36 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
                 onPressed: () {
                   setState(() {
                     if (edit == null) {
-                      mockAppointments.add(Appointment(
-                        id: mockAppointments.length + 1,
+                      mockAppointments.add(
+                        Appointment(
+                          id: mockAppointments.length + 1,
+                          clientId: selectedClientId,
+                          barberId: selectedBarberId,
+                          date: selectedDate,
+                          hour: selectedHour,
+                          service: selectedService,
+                          status: "pending",
+                        ),
+                      );
+                    } else {
+                      final index =
+                          mockAppointments.indexWhere((a) => a.id == edit.id);
+
+                      mockAppointments[index] = edit.copyWith(
                         clientId: selectedClientId,
                         barberId: selectedBarberId,
                         date: selectedDate,
                         hour: selectedHour,
                         service: selectedService,
-                        status: "pending",
-                      ));
-                    } else {
-                      edit.clientId = selectedClientId;
-                      edit.barberId = selectedBarberId;
-                      edit.date = selectedDate;
-                      edit.hour = selectedHour;
-                      edit.service = selectedService;
+                      );
                     }
                   });
+
                   Navigator.pop(context);
                 },
                 child: const Text("Guardar"),
               ),
+
             ],
           );
         },

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../employee/employee_agenda_screen.dart';
 import '../employee/availability_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class EmployeeHome extends StatelessWidget {
   const EmployeeHome({super.key});
@@ -19,7 +20,7 @@ class EmployeeHome extends StatelessWidget {
           IconButton(
             onPressed: () {
               authProvider.logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              context.go("/login");
             },
             icon: const Icon(Icons.logout),
           ),

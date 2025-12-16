@@ -1,7 +1,22 @@
-// lib/mock/mock_services.dart
 import '../models/service.dart';
 
-List<Service> mockServices = [
-  Service(id: 1, name: "Corte de cabello", price: 28000),
-  Service(id: 2, name: "Corte y barba", price: 38000),
+final List<Service> mockServices = [
+  Service(
+    id: 1,
+    name: "Corte",
+    price: 28000,
+    assetImage: "assets/images/services/corte.jpg",
+  ),
+  Service(
+    id: 2,
+    name: "Corte + Barba",
+    price: 38000,
+    assetImage: "assets/images/services/corte_barba.jpg",
+  ),
+  Service(
+    id: 3,
+    name: "Perfilado",
+    price: 12000,
+    assetImage: "assets/images/services/perfilada.jpg",
+  ),
 ];

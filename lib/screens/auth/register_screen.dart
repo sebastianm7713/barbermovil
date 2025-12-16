@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/app_theme.dart';
+import '../../models/user.dart';
+import '../../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -9,101 +12,56 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text("Crear cuenta"),
-      ),
-      body: SingleChildScrollView(
+      appBar: AppBar(title: const Text("Crear cuenta")),
+      body: Padding(
         padding: const EdgeInsets.all(25),
-        child: Container(
-          padding: const EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: "Nombre completo",
-                  prefixIcon: Icon(Icons.person),
-                ),
-              ),
-              const SizedBox(height: 20),
+        child: Column(
+          children: [
+            TextField(controller: nameController, decoration: const InputDecoration(labelText: "Nombre")),
+            TextField(controller: emailController, decoration: const InputDecoration(labelText: "Correo")),
+            TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(labelText: "Contraseña")),
+            TextField(controller: confirmPasswordController, obscureText: true, decoration: const InputDecoration(labelText: "Confirmar contraseña")),
+            const SizedBox(height: 25),
 
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: "Correo electrónico",
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (passwordController.text != confirmPasswordController.text) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Las contraseñas no coinciden")),
+                  );
+                  return;
+                }
 
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Contraseña",
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-              const SizedBox(height: 20),
+                final newUser = User(
+                  id: DateTime.now().millisecondsSinceEpoch,
+                  name: nameController.text.trim(),
+                  email: emailController.text.trim(),
+                  password: passwordController.text.trim(),
+                  role: "client", // 👈 por defecto
+                );
 
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Confirmar contraseña",
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-              ),
-              const SizedBox(height: 30),
+                authProvider.register(newUser);
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (passwordController.text.trim() !=
-                        confirmPasswordController.text.trim()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Las contraseñas no coinciden"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Usuario registrado correctamente")),
+                );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Usuario registrado (demo)"),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-                  child: const Text("Registrarme"),
-                ),
-              )
-            ],
-          ),
+                Navigator.pop(context); // vuelve al login
+              },
+              child: const Text("Registrarme"),
+            ),
+          ],
         ),
       ),
     );

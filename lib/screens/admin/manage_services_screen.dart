@@ -104,27 +104,30 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
   }
 
   Widget _buildServiceImage(Service service) {
-    if (service.imageFile != null) {
-      return FutureBuilder<Uint8List>(
-        future: service.imageFile!.readAsBytes(),
-        builder: (_, snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox(
-              width: 70,
-              height: 70,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return Image.memory(
-            snapshot.data!,
+  // Imagen subida desde galería
+  if (service.imageFile != null) {
+    return FutureBuilder<Uint8List>(
+      future: service.imageFile!.readAsBytes(),
+      builder: (_, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
             width: 70,
             height: 70,
-            fit: BoxFit.cover,
+            child: CircularProgressIndicator(),
           );
-        },
-      );
-    }
+        }
+        return Image.memory(
+          snapshot.data!,
+          width: 70,
+          height: 70,
+          fit: BoxFit.cover,
+        );
+      },
+    );
+  }
 
+  // Imagen desde assets
+  if (service.assetImage != null) {
     return Image.asset(
       service.assetImage!,
       width: 70,
@@ -132,6 +135,16 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
       fit: BoxFit.cover,
     );
   }
+
+  // Fallback (NUNCA vuelve a romper)
+  return Container(
+    width: 70,
+    height: 70,
+    color: Colors.grey.shade300,
+    child: const Icon(Icons.image_not_supported),
+  );
+}
+
 
   void _openServiceForm({Service? service}) {
     final nameCtrl = TextEditingController(text: service?.name ?? "");

@@ -111,21 +111,21 @@
     },
     {
       "name": "flutter_local_notifications",
-      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications-12.0.4",
+      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications-17.2.4",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_local_notifications_linux",
-      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications_linux-2.0.0",
+      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_local_notifications_platform_interface",
-      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications_platform_interface-6.0.0",
+      "rootUri": "file:///C:/Users/sebas/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications_platform_interface-7.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_plugin_android_lifecycle",

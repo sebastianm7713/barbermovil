@@ -56,7 +56,7 @@ final GoRouter appRouter = GoRouter(
       switch (role) {
         case "admin":
           return "/admin/dashboard";
-        case "empleado":
+        case "employee":
           return "/employee/home";
         default:
           return "/client/home";
@@ -79,7 +79,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: "/admin/appointments", builder: (_, __) => const ManageAppointmentsScreen()),
     GoRoute(path: "/admin/kpis", builder: (_, __) => const KpisScreen()),
     GoRoute(path: "/admin/services",builder: (_, __) => const ManageServicesScreen(),),
-    GoRoute(path: '/admin/appointments',builder: (context, state) => const ManageAppointmentsScreen(),),
+    
 
 
 

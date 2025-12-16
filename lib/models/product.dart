@@ -1,11 +1,11 @@
 class Product {
-  final int id;
-  final String name;
-  final String description;
-  final double price;
-  final int stock;
-  final String imageUrl;
-  final String category;
+  int id;
+  String name;
+  String description;
+  int price;
+  int stock;
+  String imageUrl;
+  String category;
 
   Product({
     required this.id,
@@ -16,26 +16,4 @@ class Product {
     required this.imageUrl,
     required this.category,
   });
-
-  // Convertir JSON a modelo
-  factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        price: (json["price"] as num).toDouble(),
-        stock: json["stock"],
-        imageUrl: json["imageUrl"] ?? "",
-        category: json["category"],
-      );
-
-  // Convertir modelo a JSON
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "description": description,
-        "price": price,
-        "stock": stock,
-        "imageUrl": imageUrl,
-        "category": category,
-      };
 }

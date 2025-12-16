@@ -35,16 +35,21 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
         itemCount: mockAppointments.length,
         itemBuilder: (_, index) {
           final appt = mockAppointments[index];
+
           return Card(
             margin: const EdgeInsets.only(bottom: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
             child: ListTile(
-              title: Text(appt.service.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(
+                appt.service.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               subtitle: Text(
-                  "${DateFormat('dd/MM/yyyy').format(appt.date)} · ${appt.hour}\nBarbero ID: ${appt.barberId} · Cliente ID: ${appt.clientId}"),
+                "${DateFormat('dd/MM/yyyy').format(appt.date)} · ${appt.hour}\n"
+                "Barbero ID: ${appt.barberId} · Cliente ID: ${appt.clientId}",
+              ),
               trailing: Wrap(
                 children: [
                   IconButton(
@@ -68,6 +73,7 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
     );
   }
 
+  /// 🧾 FORM CREAR / EDITAR
   void _openForm({Appointment? edit}) {
     DateTime selectedDate = edit?.date ?? DateTime.now();
     String selectedHour = edit?.hour ?? "09:00 AM";
@@ -85,11 +91,13 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Fecha
+                  /// 📅 FECHA
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(DateFormat('dd/MM/yyyy').format(selectedDate)),
                     leading: const Icon(Icons.calendar_month),
+                    title: Text(
+                      DateFormat('dd/MM/yyyy').format(selectedDate),
+                    ),
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -97,17 +105,22 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
                         firstDate: DateTime.now(),
                         lastDate: DateTime(2030),
                       );
-                      if (picked != null) setModal(() => selectedDate = picked);
+                      if (picked != null) {
+                        setModal(() => selectedDate = picked);
+                      }
                     },
                   ),
+
                   const SizedBox(height: 12),
 
-                  // Hora
+                  /// ⏰ HORA
                   DropdownButtonFormField<String>(
                     isExpanded: true,
                     value: selectedHour,
                     decoration: const InputDecoration(
-                        labelText: "Hora", border: OutlineInputBorder()),
+                      labelText: "Hora",
+                      border: OutlineInputBorder(),
+                    ),
                     items: [
                       "09:00 AM",
                       "10:00 AM",
@@ -116,90 +129,122 @@ class _ManageAppointmentsScreenState extends State<ManageAppointmentsScreen> {
                       "03:00 PM",
                       "04:00 PM",
                     ]
-                        .map((h) => DropdownMenuItem(
-                              value: h,
-                              child: Text(h),
-                            ))
+                        .map(
+                          (h) => DropdownMenuItem(
+                            value: h,
+                            child: Text(h),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) => setModal(() => selectedHour = v!),
                   ),
+
                   const SizedBox(height: 12),
 
-                  // Barbero ID
+                  /// 💈 BARBERO
                   DropdownButtonFormField<int>(
                     isExpanded: true,
                     value: selectedBarberId,
                     decoration: const InputDecoration(
-                        labelText: "Barbero ID", border: OutlineInputBorder()),
+                      labelText: "Barbero",
+                      border: OutlineInputBorder(),
+                    ),
                     items: [1, 2, 3]
-                        .map((b) => DropdownMenuItem(
-                              value: b,
-                              child: Text("Barbero $b"),
-                            ))
+                        .map(
+                          (b) => DropdownMenuItem(
+                            value: b,
+                            child: Text("Barbero $b"),
+                          ),
+                        )
                         .toList(),
-                    onChanged: (v) => setModal(() => selectedBarberId = v!),
+                    onChanged: (v) =>
+                        setModal(() => selectedBarberId = v!),
                   ),
+
                   const SizedBox(height: 12),
 
-                  // Cliente ID
+                  /// 👤 CLIENTE
                   DropdownButtonFormField<int>(
                     isExpanded: true,
                     value: selectedClientId,
                     decoration: const InputDecoration(
-                        labelText: "Cliente ID", border: OutlineInputBorder()),
+                      labelText: "Cliente",
+                      border: OutlineInputBorder(),
+                    ),
                     items: [1, 2, 3]
-                        .map((c) => DropdownMenuItem(
-                              value: c,
-                              child: Text("Cliente $c"),
-                            ))
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Text("Cliente $c"),
+                          ),
+                        )
                         .toList(),
-                    onChanged: (v) => setModal(() => selectedClientId = v!),
+                    onChanged: (v) =>
+                        setModal(() => selectedClientId = v!),
                   ),
+
                   const SizedBox(height: 12),
 
-                  // Servicio
+                  /// ✂️ SERVICIO
                   DropdownButtonFormField<Service>(
                     isExpanded: true,
                     value: selectedService,
                     decoration: const InputDecoration(
-                        labelText: "Servicio", border: OutlineInputBorder()),
+                      labelText: "Servicio",
+                      border: OutlineInputBorder(),
+                    ),
                     items: mockServices
-                        .map((s) => DropdownMenuItem(
-                              value: s,
-                              child:
-                                  Text(s.name, overflow: TextOverflow.ellipsis),
-                            ))
+                        .map(
+                          (s) => DropdownMenuItem<Service>(
+                            value: s,
+                            child: Text(
+                              s.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
                         .toList(),
-                    onChanged: (v) => setModal(() => selectedService = v!),
+                    onChanged: (v) =>
+                        setModal(() => selectedService = v!),
                   ),
                 ],
               ),
             ),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancelar")),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancelar"),
+              ),
               ElevatedButton(
                 onPressed: () {
                   setState(() {
                     if (edit == null) {
-                      mockAppointments.add(Appointment(
-                        id: mockAppointments.length + 1,
+                      mockAppointments.add(
+                        Appointment(
+                          id: mockAppointments.length + 1,
+                          clientId: selectedClientId,
+                          barberId: selectedBarberId,
+                          date: selectedDate,
+                          hour: selectedHour,
+                          service: selectedService,
+                          status: "pending",
+                        ),
+                      );
+                    } else {
+                      final index = mockAppointments.indexOf(edit);
+
+                      mockAppointments[index] = Appointment(
+                        id: edit.id,
                         clientId: selectedClientId,
                         barberId: selectedBarberId,
                         date: selectedDate,
                         hour: selectedHour,
                         service: selectedService,
-                        status: "pending",
-                      ));
-                    } else {
-                      edit.clientId = selectedClientId;
-                      edit.barberId = selectedBarberId;
-                      edit.date = selectedDate;
-                      edit.hour = selectedHour;
-                      edit.service = selectedService;
+                        status: edit.status,
+                      );
                     }
                   });
+
                   Navigator.pop(context);
                 },
                 child: const Text("Guardar"),

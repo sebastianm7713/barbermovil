@@ -4,8 +4,8 @@ class Service {
   final int id;
   final String name;
   final int price;
-  final XFile? imageFile; // imagen desde dispositivo
-  final String? assetImage; // imagen por defecto
+  final XFile? imageFile;      // imagen subida
+  final String? assetImage;    // imagen fija desde assets
 
   Service({
     required this.id,

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/appointment_provider.dart';
 import '../../providers/barber_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/loading_widget.dart';
+
 import '../../models/appointment.dart';
+import '../../models/service.dart';
+import '../../mock/mock_services.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   const BookAppointmentScreen({super.key});
@@ -17,24 +21,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   int? selectedBarberId;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  String? selectedService;
-
-  final List<String> services = [
-    "Corte",
-    "Barba",
-    "Corte + Barba",
-    "Cejas",
-    "Coloración"
-  ];
+  Service? selectedService;
 
   @override
   void initState() {
     super.initState();
-    final barberProvider = Provider.of<BarberProvider>(context, listen: false);
-
-    /// 🔥 tu provider NO tenía loadBarbers()
-    /// Se llama fetchBarbers()
-    barberProvider.fetchBarbers();
+    Provider.of<BarberProvider>(context, listen: false).fetchBarbers();
   }
 
   @override
@@ -55,7 +47,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // ---------- BARBERO ----------
+                  // -------- BARBERO --------
                   const Text(
                     "Selecciona un barbero",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -63,8 +55,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   const SizedBox(height: 10),
 
                   DropdownButtonFormField<int>(
-                    hint: const Text("Barbero disponible"),
                     value: selectedBarberId,
+                    hint: const Text("Barbero disponible"),
                     items: barberProvider.barbers.map((barber) {
                       return DropdownMenuItem(
                         value: barber.id,
@@ -78,20 +70,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ---------- SERVICIO ----------
+                  // -------- SERVICIO --------
                   const Text(
                     "Selecciona el servicio",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
 
-                  DropdownButtonFormField<String>(
-                    hint: const Text("Servicio"),
+                  DropdownButtonFormField<Service>(
                     value: selectedService,
-                    items: services.map((service) {
-                      return DropdownMenuItem(
+                    hint: const Text("Servicio"),
+                    items: mockServices.map((service) {
+                      return DropdownMenuItem<Service>(
                         value: service,
-                        child: Text(service),
+                        child: Text(service.name),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -101,7 +93,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ---------- FECHA ----------
+                  // -------- FECHA --------
                   const Text(
                     "Selecciona la fecha",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -117,7 +109,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ---------- HORA ----------
+                  // -------- HORA --------
                   const Text(
                     "Selecciona la hora",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -133,7 +125,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
 
                   const Spacer(),
 
-                  // ---------- BOTÓN FINAL ----------
+                  // -------- BOTÓN --------
                   CustomButton(
                     text: "Reservar Cita",
                     onPressed: () async {
@@ -143,12 +135,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                           selectedService == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text("Completa todos los campos")),
+                            content: Text("Completa todos los campos"),
+                          ),
                         );
                         return;
                       }
 
-                      // Construir FULL DATETIME
                       final fullDate = DateTime(
                         selectedDate!.year,
                         selectedDate!.month,
@@ -157,9 +149,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         selectedTime!.minute,
                       );
 
-                      final newAppointment = Appointment(
+                      final appointment = Appointment(
                         id: 0,
-                        clientId: 999, // reemplaza por ID real del cliente logueado
+                        clientId: 999, // luego vendrá del login
                         barberId: selectedBarberId!,
                         date: fullDate,
                         hour:
@@ -168,23 +160,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                         status: "pending",
                       );
 
-                      final ok =
-                          await appointmentProvider.createAppointment(newAppointment);
+                      final ok = await appointmentProvider
+                          .createAppointment(appointment);
 
                       if (!mounted) return;
 
-                      if (ok) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Cita registrada exitosamente")),
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Error al registrar la cita")),
-                        );
-                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(ok
+                              ? "Cita registrada exitosamente"
+                              : "Error al registrar la cita"),
+                        ),
+                      );
+
+                      if (ok) Navigator.pop(context);
                     },
                   ),
                 ],
@@ -193,11 +182,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
-  // ---------- FUNCIONES ----------
+  // -------- HELPERS --------
 
   Future<void> pickDate() async {
-    DateTime now = DateTime.now();
-    final DateTime? date = await showDatePicker(
+    final now = DateTime.now();
+    final date = await showDatePicker(
       context: context,
       initialDate: now,
       firstDate: now,
@@ -210,7 +199,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   }
 
   Future<void> pickTime() async {
-    final TimeOfDay? time =
+    final time =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
 
     if (time != null) {

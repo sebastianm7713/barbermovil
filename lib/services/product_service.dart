@@ -1,76 +1,55 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import '../core/api.dart';
 import '../models/product.dart';
+import '../mock/mock_products.dart';
 
 class ProductService {
-  final String baseUrl = "${Api.baseUrl}/products";
-
-  // Obtener todos los productos
+  /// Obtener todos los productos
   Future<List<Product>> getAllProducts() async {
-    final url = Uri.parse(baseUrl);
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((e) => Product.fromJson(e)).toList();
-    } else {
-      throw Exception("Error al obtener productos");
-    }
+    await Future.delayed(const Duration(milliseconds: 300)); // simula carga
+    return mockProducts;
   }
 
-  // Obtener productos por categoría
+  /// Obtener productos por categoría
   Future<List<Product>> getProductsByCategory(String category) async {
-    final url = Uri.parse("$baseUrl/category/$category");
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((e) => Product.fromJson(e)).toList();
-    } else {
-      throw Exception("Error al obtener productos por categoría");
-    }
+    await Future.delayed(const Duration(milliseconds: 300));
+    return mockProducts
+        .where((product) => product.category == category)
+        .toList();
   }
 
-  // Crear producto
+  /// Crear producto
   Future<Product?> createProduct(Product product) async {
-    final url = Uri.parse(baseUrl);
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(product.toJson()),
+    final newProduct = Product(
+      id: mockProducts.length + 1,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      imageUrl: product.imageUrl,
+      category: product.category,
     );
 
-    if (response.statusCode == 201) {
-      return Product.fromJson(jsonDecode(response.body));
-    } else {
-      return null;
-    }
+    mockProducts.add(newProduct);
+    return newProduct;
   }
 
-  // Actualizar producto
+  /// Actualizar producto
   Future<bool> updateProduct(int id, Product product) async {
-    final url = Uri.parse("$baseUrl/$id");
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    final response = await http.put(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(product.toJson()),
-    );
+    final index = mockProducts.indexWhere((p) => p.id == id);
+    if (index == -1) return false;
 
-    return response.statusCode == 200;
+    mockProducts[index] = product;
+    return true;
   }
 
-  // Eliminar producto
+  /// Eliminar producto
   Future<bool> deleteProduct(int id) async {
-    final url = Uri.parse("$baseUrl/$id");
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    final response = await http.delete(url);
-
-    return response.statusCode == 200;
+    mockProducts.removeWhere((p) => p.id == id);
+    return true;
   }
 }

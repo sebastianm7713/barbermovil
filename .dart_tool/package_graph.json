@@ -62,7 +62,7 @@
     },
     {
       "name": "flutter_local_notifications",
-      "version": "12.0.4",
+      "version": "17.2.4",
       "dependencies": [
         "clock",
         "flutter",
@@ -255,7 +255,7 @@
     },
     {
       "name": "flutter_local_notifications_platform_interface",
-      "version": "6.0.0",
+      "version": "7.2.0",
       "dependencies": [
         "flutter",
         "plugin_platform_interface"
@@ -263,9 +263,10 @@
     },
     {
       "name": "flutter_local_notifications_linux",
-      "version": "2.0.0",
+      "version": "4.0.1",
       "dependencies": [
         "dbus",
+        "ffi",
         "flutter",
         "flutter_local_notifications_platform_interface",
         "path",
@@ -529,6 +530,11 @@
       ]
     },
     {
+      "name": "ffi",
+      "version": "2.1.4",
+      "dependencies": []
+    },
+    {
       "name": "dbus",
       "version": "0.7.11",
       "dependencies": [
@@ -561,11 +567,6 @@
         "path",
         "term_glyph"
       ]
-    },
-    {
-      "name": "ffi",
-      "version": "2.1.4",
-      "dependencies": []
     },
     {
       "name": "platform",
