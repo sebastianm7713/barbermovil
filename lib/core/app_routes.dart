@@ -10,7 +10,7 @@ import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/register_screen.dart';
 
 // Admin Screens
-import '../screens/admin/admin_dashboard.dart';
+import '../screens/admin/admin_main_screen.dart';
 import '../screens/admin/manage_users_screen.dart';
 import '../screens/admin/manage_products_screen.dart';
 import '../screens/admin/manage_appointments_screen.dart';
@@ -19,12 +19,12 @@ import '../screens/admin/manage_services_screen.dart';
 
 
 // Client Screens
-import '../screens/client/client_home.dart';
+import '../screens/main_screen.dart';
 import '../screens/client/catalog_screen.dart';
 import '../screens/client/book_appointment_screen.dart';
 
 // Employee Screens
-import '../screens/employee/employee_home.dart';
+import '../screens/employee/employee_main_screen.dart';
 import '../screens/employee/employee_agenda_screen.dart';
 import '../screens/employee/availability_screen.dart';
 
@@ -73,7 +73,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: "/register", builder: (_, __) => const RegisterScreen()),
 
     /// ADMIN
-    GoRoute(path: "/admin/dashboard", builder: (_, __) => const AdminDashboard()),
+    GoRoute(path: "/admin/dashboard", builder: (_, __) => const AdminMainScreen()),
     GoRoute(path: "/admin/users", builder: (_, __) => const ManageUsersScreen()),
     GoRoute(path: "/admin/products", builder: (_, __) => const ManageProductsScreen()),
     GoRoute(path: "/admin/appointments", builder: (_, __) => const ManageAppointmentsScreen()),
@@ -84,12 +84,12 @@ final GoRouter appRouter = GoRouter(
 
 
     /// CLIENT
-    GoRoute(path: "/client/home", builder: (_, __) => const ClientHome()),
+    GoRoute(path: "/client/home", builder: (_, __) => const MainScreen()),
     GoRoute(path: "/client/catalog", builder: (_, __) => const CatalogScreen()),
     GoRoute(path: "/client/book", builder: (_, __) => const BookAppointmentScreen()),
 
     /// EMPLOYEE
-    GoRoute(path: "/employee/home", builder: (_, __) => const EmployeeHome()),
+    GoRoute(path: "/employee/home", builder: (_, __) => const EmployeeMainScreen()),
     GoRoute(path: "/employee/agenda", builder: (_, __) => const EmployeeAgendaScreen()),
     GoRoute(path: "/employee/availability", builder: (_, __) => const AvailabilityScreen()),
   ],

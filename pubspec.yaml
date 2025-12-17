@@ -14,11 +14,18 @@ dependencies:
   dio: ^5.0.0
   shared_preferences: ^2.0.15
   intl: ^0.18.0
+  table_calendar: ^3.0.9
   flutter_local_notifications: ^17.2.2
   cupertino_icons: ^1.0.5
   go_router: ^14.8.1
   google_fonts: ^6.3.2
   image_picker: ^1.1.2
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/barber-logo.jpg"
 
 flutter:
   uses-material-design: true

@@ -11,6 +11,8 @@ import 'providers/user_provider.dart';
 import 'providers/barber_availability_provider.dart';
 import 'providers/barber_appointment_provider.dart'; // 👈 SI EXISTE
 
+import 'core/app_theme.dart'; // Add import
+
 void main() {
   runApp(const BarberSiteApp());
 }
@@ -41,7 +43,7 @@ class BarberSiteApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'BarberSite',
         routerConfig: appRouter,
-        theme: ThemeData.light(),
+        theme: AppTheme.lightTheme, // Use custom theme
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
-import '../../providers/cart_provider.dart';
 import '../../widgets/loading_widget.dart';
+import '../../core/app_theme.dart';
 
 class CatalogScreen extends StatelessWidget {
   const CatalogScreen({super.key});
@@ -19,15 +19,9 @@ class CatalogScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Catálogo de Productos"),
-        backgroundColor: Colors.black87,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.pushNamed(context, "/cart");
-            },
-          )
-        ],
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
+        centerTitle: true,
       ),
       body: productProvider.isLoading
           ? const LoadingWidget()
@@ -43,7 +37,7 @@ class CatalogScreen extends StatelessWidget {
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.70,
+                    childAspectRatio: 0.85, // Adjusted for removed button
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
@@ -65,15 +59,16 @@ class CatalogScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           // Imagen
-                          Container(
-                            height: 120,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12)),
-                              image: DecorationImage(
-                                image: NetworkImage(product.imageUrl),
-                                fit: BoxFit.cover,
+                          Expanded( // Use Expanded to fill space nicely
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(12)),
+                                image: DecorationImage(
+                                  image: NetworkImage(product.imageUrl),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
@@ -90,6 +85,8 @@ class CatalogScreen extends StatelessWidget {
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
 
                                 const SizedBox(height: 5),
@@ -98,33 +95,9 @@ class CatalogScreen extends StatelessWidget {
                                   "\$${product.price.toStringAsFixed(0)} COP",
                                   style: const TextStyle(
                                     fontSize: 15,
-                                    color: Colors.black87,
+                                    color: AppTheme.primary,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                // 🔥 Botón de agregar al carrito FIXED
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black87,
-                                    minimumSize:
-                                        const Size(double.infinity, 35),
-                                  ),
-                                  onPressed: () {
-                                    Provider.of<CartProvider>(context,
-                                            listen: false)
-                                        .addToCart(product);
-
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            "Producto agregado al carrito"),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text("Agregar al carrito"),
                                 ),
                               ],
                             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../providers/barber_availability_provider.dart';
+import '../../core/app_theme.dart';
 
 class AvailabilityScreen extends StatefulWidget {
   const AvailabilityScreen({super.key});
@@ -18,7 +19,8 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Disponibilidad"),
-        backgroundColor: Colors.black87,
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

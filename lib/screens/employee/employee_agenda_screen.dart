@@ -6,6 +6,7 @@ import '../../mock/mock_services.dart';
 import '../../widgets/loading_widget.dart';
 import '../../models/barber_appointment.dart';
 import '../../models/service.dart';
+import '../../core/app_theme.dart';
 
 
 class EmployeeAgendaScreen extends StatefulWidget {
@@ -38,10 +39,10 @@ class _EmployeeAgendaScreenState extends State<EmployeeAgendaScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Agenda del Día"),
-        backgroundColor: Colors.black87,
+        backgroundColor: AppTheme.primary,
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black87,
+        backgroundColor: AppTheme.primary,
         child: const Icon(Icons.add),
         onPressed: _openAddAppointmentForm,
       ),
@@ -119,7 +120,7 @@ class _EmployeeAgendaScreenState extends State<EmployeeAgendaScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.black87,
+          color: AppTheme.primary,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

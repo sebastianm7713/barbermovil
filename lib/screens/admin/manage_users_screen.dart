@@ -6,6 +6,7 @@ import '../../services/user_service.dart';
 import '../../models/user.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/custom_button.dart';
+import '../../core/app_theme.dart';
 
 class ManageUsersScreen extends StatefulWidget {
   const ManageUsersScreen({super.key});
@@ -51,7 +52,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Gestionar Usuarios"),
-        backgroundColor: Colors.black87,
+        backgroundColor: AppTheme.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -63,7 +64,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
+        backgroundColor: AppTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () => openUserForm(),
       ),
@@ -79,7 +80,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.black87,
+                          backgroundColor: AppTheme.primary,
                           child: Text(
                             u.name.substring(0, 1).toUpperCase(),
                             style: const TextStyle(color: Colors.white),
