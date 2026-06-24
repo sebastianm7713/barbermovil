@@ -1,11 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/app_theme.dart';
-import '../../mock/mock_services.dart';
 import '../../models/service.dart';
-
+import '../../providers/service_provider.dart';
 
 class ManageServicesScreen extends StatefulWidget {
   const ManageServicesScreen({super.key});
@@ -18,138 +19,206 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
   final ImagePicker _picker = ImagePicker();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text("Servicios"),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.add),
-        onPressed: () => _openServiceForm(),
-      ),
-
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: mockServices.length,
-        itemBuilder: (_, index) {
-          final service = mockServices[index];
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  // IMAGEN
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: _buildServiceImage(service),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  // INFO
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          service.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "\$${service.price}",
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // ACCIONES
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _openServiceForm(service: service),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            mockServices.removeAt(index);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
+  void initState() {
+    super.initState();
+    // Load services when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final serviceProvider = Provider.of<ServiceProvider>(context, listen: false);
+      if (serviceProvider.services.isEmpty && !serviceProvider.isLoading) {
+        serviceProvider.loadServices();
+      }
+    });
   }
 
-  Widget _buildServiceImage(Service service) {
-  // Imagen subida desde galería
-  if (service.imageFile != null) {
-    return FutureBuilder<Uint8List>(
-      future: service.imageFile!.readAsBytes(),
-      builder: (_, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox(
-            width: 70,
-            height: 70,
-            child: CircularProgressIndicator(),
-          );
-        }
-        return Image.memory(
-          snapshot.data!,
-          width: 70,
-          height: 70,
-          fit: BoxFit.cover,
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ServiceProvider>(
+      builder: (context, serviceProvider, child) {
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          appBar: AppBar(
+            title: const Text("Servicios"),
+            backgroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
+          ),
+
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: AppTheme.primary,
+            child: const Icon(Icons.add),
+            onPressed: () => _openServiceForm(context),
+          ),
+
+          body: serviceProvider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : serviceProvider.services.isEmpty
+                  ? const Center(child: Text("No hay servicios disponibles."))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: serviceProvider.services.length,
+                      itemBuilder: (_, index) {
+                        final service = serviceProvider.services[index];
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                // IMAGEN
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: _buildServiceImage(service),
+                                ),
+
+                                const SizedBox(width: 14),
+
+                                // INFO
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        service.name,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        "\$${service.price}",
+                                        style: const TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // ACCIONES
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Colors.blue),
+                                      onPressed: () => _openServiceForm(context, service: service),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () async {
+                                        final success = await serviceProvider.deleteService(service.id);
+                                        if (!success && mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Error al eliminar servicio')),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
         );
       },
     );
   }
 
-  // Imagen desde assets
-  if (service.assetImage != null) {
-    return Image.asset(
-      service.assetImage!,
+  Widget _buildServiceImage(Service service) {
+    // Imagen subida desde galería
+    if (service.imageFile != null) {
+      return FutureBuilder<Uint8List>(
+        future: service.imageFile!.readAsBytes(),
+        builder: (_, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox(
+              width: 70,
+              height: 70,
+              child: CircularProgressIndicator(),
+            );
+          }
+          return Image.memory(
+            snapshot.data!,
+            width: 70,
+            height: 70,
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    }
+
+    // Imagen desde URL o data URI
+    if (service.imageUrl.isNotEmpty) {
+      if (service.imageUrl.startsWith('data:')) {
+        try {
+          final commaIndex = service.imageUrl.indexOf(',');
+          final base64Data = commaIndex != -1 ? service.imageUrl.substring(commaIndex + 1) : '';
+          final bytes = base64Decode(base64Data);
+          return Image.memory(
+            bytes,
+            width: 70,
+            height: 70,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 70,
+              height: 70,
+              color: Colors.grey[300],
+              child: const Icon(Icons.image),
+            ),
+          );
+        } catch (_) {
+          return Container(
+            width: 70,
+            height: 70,
+            color: Colors.grey[300],
+            child: const Icon(Icons.broken_image),
+          );
+        }
+      }
+
+      return Image.network(
+        service.imageUrl,
+        width: 70,
+        height: 70,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 70,
+          height: 70,
+          color: Colors.grey[300],
+          child: const Icon(Icons.image),
+        ),
+      );
+    }
+
+    // Imagen desde assets
+    if (service.assetImage != null) {
+      return Image.asset(
+        service.assetImage!,
+        width: 70,
+        height: 70,
+        fit: BoxFit.cover,
+      );
+    }
+
+    // Fallback (NUNCA vuelve a romper)
+    return Container(
       width: 70,
       height: 70,
-      fit: BoxFit.cover,
+      color: Colors.grey.shade300,
+      child: const Icon(Icons.image_not_supported),
     );
   }
 
-  // Fallback (NUNCA vuelve a romper)
-  return Container(
-    width: 70,
-    height: 70,
-    color: Colors.grey.shade300,
-    child: const Icon(Icons.image_not_supported),
-  );
-}
-
-
-  void _openServiceForm({Service? service}) {
+  void _openServiceForm(BuildContext context, {Service? service}) {
+    final serviceProvider = Provider.of<ServiceProvider>(context, listen: false);
     final nameCtrl = TextEditingController(text: service?.name ?? "");
-    final priceCtrl =
-        TextEditingController(text: service?.price.toString() ?? "");
+    final priceCtrl = TextEditingController(text: service?.price.toString() ?? "");
+    final descriptionCtrl = TextEditingController(text: service?.description ?? "");
+    final durationCtrl = TextEditingController(text: service?.duration.toString() ?? "");
+    final imageCtrl = TextEditingController(text: service?.imageUrl ?? "");
     XFile? selectedImage = service?.imageFile;
 
     showDialog(
@@ -206,9 +275,25 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
                   ),
 
                   TextField(
+                    controller: descriptionCtrl,
+                    decoration: const InputDecoration(labelText: "Descripción"),
+                  ),
+
+                  TextField(
                     controller: priceCtrl,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: "Precio"),
+                  ),
+
+                  TextField(
+                    controller: durationCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: "Duración (minutos)"),
+                  ),
+
+                  TextField(
+                    controller: imageCtrl,
+                    decoration: const InputDecoration(labelText: "Imagen (URL)"),
                   ),
                 ],
               ),
@@ -219,32 +304,35 @@ class _ManageServicesScreenState extends State<ManageServicesScreen> {
                 child: const Text("Cancelar"),
               ),
               ElevatedButton(
-                onPressed: () {
-                  if (nameCtrl.text.isEmpty ||
-                      priceCtrl.text.isEmpty) return;
+                onPressed: () async {
+                  if (nameCtrl.text.isEmpty || priceCtrl.text.isEmpty) return;
 
-                  setState(() {
-                    if (service == null) {
-                      mockServices.add(
-                        Service(
-                          id: mockServices.length + 1,
-                          name: nameCtrl.text,
-                          price: int.parse(priceCtrl.text),
-                          imageFile: selectedImage,
-                        ),
-                      );
-                    } else {
-                      final index = mockServices.indexOf(service);
-                      mockServices[index] = Service(
-                        id: service.id,
-                        name: nameCtrl.text,
-                        price: int.parse(priceCtrl.text),
-                        imageFile: selectedImage,
+                  final newService = Service(
+                    id: service?.id ?? 0,
+                    name: nameCtrl.text,
+                    description: descriptionCtrl.text,
+                    price: int.tryParse(priceCtrl.text) ?? 0,
+                    duration: int.tryParse(durationCtrl.text) ?? 30,
+                    imageUrl: imageCtrl.text,
+                    imageFile: selectedImage,
+                  );
+
+                  bool success;
+                  if (service == null) {
+                    success = await serviceProvider.createService(newService);
+                  } else {
+                    success = await serviceProvider.updateService(service.id, newService);
+                  }
+
+                  if (success) {
+                    Navigator.pop(context);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(service == null ? 'Error al crear servicio' : 'Error al actualizar servicio')),
                       );
                     }
-                  });
-
-                  Navigator.pop(context);
+                  }
                 },
                 child: const Text("Guardar"),
               ),

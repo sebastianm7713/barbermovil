@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/api.dart';
 import '../models/roles.dart';
 
 class RoleService {
-  final String baseUrl = 'http://localhost:3000/api/roles';
 
   /// Obtener todos los roles
   Future<List<Role>> getRoles() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    final response = await http.get(Uri.parse('${Api.baseUrl}/roles'));
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -20,7 +20,7 @@ class RoleService {
   /// Crear rol
   Future<Role> createRole(Role role) async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse('${Api.baseUrl}/roles'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(role.toJson()),
     );
@@ -35,7 +35,7 @@ class RoleService {
   /// Actualizar rol
   Future<Role> updateRole(Role role) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/${role.id}'),
+      Uri.parse('${Api.baseUrl}/roles/${role.id}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(role.toJson()),
     );
@@ -49,7 +49,7 @@ class RoleService {
 
   /// Eliminar rol
   Future<void> deleteRole(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+    final response = await http.delete(Uri.parse('${Api.baseUrl}/roles/$id'));
 
     if (response.statusCode != 200) {
       throw Exception('Error al eliminar rol');

@@ -80,11 +80,18 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: AppTheme.primary,
-                          child: Text(
-                            u.name.substring(0, 1).toUpperCase(),
-                            style: const TextStyle(color: Colors.white),
-                          ),
+                          backgroundImage: u.avatarUrl != null && u.avatarUrl!.isNotEmpty
+                              ? NetworkImage(u.avatarUrl!)
+                              : null,
+                          backgroundColor: u.avatarUrl != null && u.avatarUrl!.isNotEmpty
+                              ? null
+                              : AppTheme.primary,
+                          child: u.avatarUrl != null && u.avatarUrl!.isNotEmpty
+                              ? null
+                              : Text(
+                                  u.name.substring(0, 1).toUpperCase(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                         ),
                         title: Text(u.name),
                         subtitle: Text("${u.email} • Rol: ${u.role}"),
@@ -128,6 +135,8 @@ class _UserFormState extends State<_UserForm> {
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController passCtrl = TextEditingController();
+  final TextEditingController phoneCtrl = TextEditingController();
+  final TextEditingController documentCtrl = TextEditingController();
 
   String role = "client";
 
@@ -138,6 +147,8 @@ class _UserFormState extends State<_UserForm> {
     if (widget.user != null) {
       nameCtrl.text = widget.user!.name;
       emailCtrl.text = widget.user!.email;
+      phoneCtrl.text = widget.user!.telefono ?? '';
+      documentCtrl.text = widget.user!.numeroDocumento ?? '';
       role = widget.user!.role;
     }
   }
@@ -161,6 +172,22 @@ class _UserFormState extends State<_UserForm> {
               controller: emailCtrl,
               label: "Correo",
               icon: Icons.email,
+            ),
+
+            const SizedBox(height: 15),
+
+            CustomInput(
+              controller: phoneCtrl,
+              label: "Teléfono",
+              icon: Icons.phone,
+            ),
+
+            const SizedBox(height: 15),
+
+            CustomInput(
+              controller: documentCtrl,
+              label: "Número de Documento",
+              icon: Icons.badge,
             ),
 
             const SizedBox(height: 15),
@@ -198,6 +225,8 @@ class _UserFormState extends State<_UserForm> {
           onPressed: () async {
             final name = nameCtrl.text.trim();
             final email = emailCtrl.text.trim();
+            final phone = phoneCtrl.text.trim();
+            final document = documentCtrl.text.trim();
 
             if (name.isEmpty || email.isEmpty) return;
 
@@ -208,6 +237,8 @@ class _UserFormState extends State<_UserForm> {
                 email: email,
                 password: passCtrl.text.trim(),
                 role: role,
+                telefono: phone,
+                numeroDocumento: document,
               );
 
               await userService.createUser(newUser);
@@ -220,6 +251,8 @@ class _UserFormState extends State<_UserForm> {
                 password: widget.user!.password,
                 role: role,
                 avatarUrl: widget.user!.avatarUrl,
+                telefono: phone,
+                numeroDocumento: document,
               );
 
               await userService.updateUser(widget.user!.id!, updatedUser);

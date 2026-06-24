@@ -1,40 +1,40 @@
 class Api {
   // URL base del backend
   // Cambia esto por tu IP o dominio
-  static const String baseUrl = "http://192.168.0.10:3000/api";
+  static const String baseUrl = "http://localhost:4000/api";
 
   // AUTH
   static const String login = "$baseUrl/auth/login";
 
   // USERS
-  static const String users = "$baseUrl/users";
+  static const String users = "$baseUrl/usuarios";
   static String userById(int id) => "$users/$id";
 
   // ROLES
   static const String roles = "$baseUrl/roles";
 
   // PRODUCTS
-  static const String products = "$baseUrl/products";
+  static const String products = "$baseUrl/productos";
   static String productById(int id) => "$products/$id";
 
   // PROVIDERS
-  static const String providers = "$baseUrl/providers";
+  static const String providers = "$baseUrl/proveedores";
   static String providerById(int id) => "$providers/$id";
 
   // APPOINTMENTS (citas)
-  static const String appointments = "$baseUrl/appointments";
+  static const String appointments = "$baseUrl/citas";
   static String appointmentById(int id) => "$appointments/$id";
 
   // BARBERS (empleados)
-  static const String barbers = "$baseUrl/barbers";
+  static const String barbers = "$baseUrl/barberos";
   static String barberById(int id) => "$barbers/$id";
 
   // SERVICES (servicios de la barbería)
-  static const String services = "$baseUrl/services";
+  static const String services = "$baseUrl/servicios";
   static String serviceById(int id) => "$services/$id";
 
   // PAYMENTS
-  static const String payments = "$baseUrl/payments";
+  static const String payments = "$baseUrl/pagos-ventas";
   static String paymentById(int id) => "$payments/$id";
 
   // DASHBOARD / KPI

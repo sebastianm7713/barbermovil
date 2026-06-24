@@ -35,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 25),
 
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (passwordController.text != confirmPasswordController.text) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Las contraseñas no coinciden")),
@@ -43,15 +43,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return;
                 }
 
-                final newUser = User(
-                  id: DateTime.now().millisecondsSinceEpoch,
-                  name: nameController.text.trim(),
-                  email: emailController.text.trim(),
+                final success = await authProvider.register(
+                  nombre: nameController.text.trim(),
+                  apellido: "",
+                  correo: emailController.text.trim(),
                   password: passwordController.text.trim(),
-                  role: "client", // 👈 por defecto
                 );
 
-                authProvider.register(newUser);
+                if (!success) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(authProvider.errorMessage ?? "Error al registrar"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  return;
+                }
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Usuario registrado correctamente")),

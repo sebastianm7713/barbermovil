@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
-import '../mock/mock_products.dart';
+import '../services/product_service.dart';
 
 class ProductProvider extends ChangeNotifier {
+  final ProductService _productService = ProductService();
   List<Product> _products = [];
   bool _isLoading = false;
 
@@ -17,8 +18,11 @@ class ProductProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 500));
-    _products = List<Product>.from(mockProducts);
+    try {
+      _products = await _productService.getAllProducts();
+    } catch (e) {
+      _products = [];
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -31,10 +35,11 @@ class ProductProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 300));
-    _products = mockProducts
-        .where((p) => p.category == category)
-        .toList();
+    try {
+      _products = await _productService.getProductsByCategory(category);
+    } catch (e) {
+      _products = [];
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -43,30 +48,54 @@ class ProductProvider extends ChangeNotifier {
   // ===============================
   // CREAR PRODUCTO (ADMIN)
   // ===============================
-  void createProduct(Product product) {
-    mockProducts.add(product);
-    _products = List<Product>.from(mockProducts);
-    notifyListeners();
-  }
-
-  // ===============================
-  // ACTUALIZAR PRODUCTO
-  // ===============================
-  void updateProduct(Product product) {
-    final index = mockProducts.indexWhere((p) => p.id == product.id);
-    if (index != -1) {
-      mockProducts[index] = product;
-      _products = List<Product>.from(mockProducts);
-      notifyListeners();
+  Future<bool> createProduct(Product product) async {
+    try {
+      final newProduct = await _productService.createProduct(product);
+      if (newProduct != null) {
+        _products.add(newProduct);
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      // Handle error
     }
+    return false;
   }
 
   // ===============================
-  // ELIMINAR PRODUCTO
+  // ACTUALIZAR PRODUCTO (ADMIN)
   // ===============================
-  void deleteProduct(int id) {
-    mockProducts.removeWhere((p) => p.id == id);
-    _products = List<Product>.from(mockProducts);
-    notifyListeners();
+  Future<bool> updateProduct(int id, Product product) async {
+    try {
+      final updatedProduct = await _productService.updateProduct(id, product);
+      if (updatedProduct != null) {
+        final index = _products.indexWhere((p) => p.id == id);
+        if (index != -1) {
+          _products[index] = updatedProduct;
+          notifyListeners();
+          return true;
+        }
+      }
+    } catch (e) {
+      print('ProductProvider updateProduct error: $e');
+    }
+    return false;
+  }
+
+  // ===============================
+  // ELIMINAR PRODUCTO (ADMIN)
+  // ===============================
+  Future<bool> deleteProduct(int id) async {
+    try {
+      final success = await _productService.deleteProduct(id);
+      if (success) {
+        _products.removeWhere((p) => p.id == id);
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      // Handle error
+    }
+    return false;
   }
 }

@@ -2,34 +2,48 @@ class User {
   final int? id;
   final String name;
   final String email;
-  final String? password; // AHORA OPCIONAL
+  final String? password;
   final String role;
   final String? avatarUrl;
+  final String? telefono;
+  final String? numeroDocumento;
 
   User({
     this.id,
     required this.name,
     required this.email,
-    this.password,       // YA NO ES REQUERIDO
+    this.password,
     required this.role,
     this.avatarUrl,
+    this.telefono,
+    this.numeroDocumento,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json["id"],
-        name: json["name"],
-        email: json["email"],
-        password: json["password"], // puede ser null
-        role: json["role"],
-        avatarUrl: json["avatarUrl"],
-      );
+    id: json["id"] ?? json["id_usuario"],
+    name: json["name"] ?? json["nombre"] ?? '',
+    email: json["email"] ?? json["correo"] ?? '',
+    password: json["password"],
+    role: json["role"] ?? _mapRoleFromId(json["id_rol"] ?? 3),
+    avatarUrl: json["avatarUrl"] ?? json["avatar"] ?? json["img"],
+    telefono: json["telefono"],
+    numeroDocumento: json["numero_documento"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "email": email,
-        "password": password,
-        "role": role,
-        "avatarUrl": avatarUrl,
-      };
+    "id": id,
+    "name": name,
+    "email": email,
+    "password": password,
+    "role": role,
+    "avatarUrl": avatarUrl,
+    "telefono": telefono,
+    "numeroDocumento": numeroDocumento,
+  };
+
+  static String _mapRoleFromId(dynamic roleId) {
+    if (roleId == 1) return 'admin';
+    if (roleId == 2) return 'employee';
+    return 'client';
+  }
 }

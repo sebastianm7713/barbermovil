@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/app_theme.dart';
-import '../../providers/auth_provider.dart';
+import '../../models/barber_appointment.dart';
+import '../../providers/appointment_provider.dart';
 import 'modify_appointment_screen.dart';
 
 /// Pantalla para gestionar citas pasadas y futuras
@@ -16,71 +19,16 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Mock data - en producción vendría de un provider/API
-  final List<Map<String, dynamic>> _upcomingAppointments = [
-    {
-      'id': 1,
-      'service': 'Corte de Cabello',
-      'barber': 'Carlos Rodríguez',
-      'date': DateTime.now().add(const Duration(days: 2)),
-      'time': '10:00',
-      'price': 15,
-      'status': 'confirmed',
-    },
-    {
-      'id': 2,
-      'service': 'Afeitado Premium',
-      'barber': 'María González',
-      'date': DateTime.now().add(const Duration(days: 5)),
-      'time': '14:30',
-      'price': 10,
-      'status': 'confirmed',
-    },
-    {
-      'id': 3,
-      'service': 'Tratamiento Capilar',
-      'barber': 'Juan Pérez',
-      'date': DateTime.now().add(const Duration(days: 7)),
-      'time': '16:00',
-      'price': 20,
-      'status': 'pending',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _pastAppointments = [
-    {
-      'id': 4,
-      'service': 'Corte de Cabello',
-      'barber': 'Ana Martínez',
-      'date': DateTime.now().subtract(const Duration(days: 15)),
-      'time': '11:00',
-      'price': 15,
-      'status': 'completed',
-    },
-    {
-      'id': 5,
-      'service': 'Afeitado Premium',
-      'barber': 'Carlos Rodríguez',
-      'date': DateTime.now().subtract(const Duration(days: 30)),
-      'time': '15:00',
-      'price': 10,
-      'status': 'completed',
-    },
-    {
-      'id': 6,
-      'service': 'Corte + Afeitado',
-      'barber': 'María González',
-      'date': DateTime.now().subtract(const Duration(days: 45)),
-      'time': '10:30',
-      'price': 22,
-      'status': 'completed',
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<AppointmentProvider>(context, listen: false);
+      if (!provider.isLoading && provider.appointments.isEmpty) {
+        provider.loadAppointments();
+      }
+    });
   }
 
   @override
@@ -108,89 +56,131 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildUpcomingAppointments(),
-          _buildPastAppointments(),
-        ],
+      body: Consumer<AppointmentProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final upcoming = provider.appointments.where((appointment) {
+            return appointment.status == 'pendiente' ||
+                appointment.status == 'pending' ||
+                appointment.status == 'confirmada' ||
+                appointment.status == 'confirmed' ||
+                appointment.status == 'en_ejecucion';
+          }).toList();
+
+          final past = provider.appointments.where((appointment) {
+            return appointment.status == 'completado' ||
+                appointment.status == 'completed' ||
+                appointment.status == 'cancelado' ||
+                appointment.status == 'cancelled';
+          }).toList();
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildAppointmentList(
+                upcoming,
+                emptyTitle: 'No tienes citas programadas',
+                emptySubtitle: '¡Reserva tu próxima cita ahora!',
+              ),
+              _buildAppointmentList(
+                past,
+                emptyTitle: 'No tienes historial de citas',
+                emptySubtitle: 'Tus citas pasadas aparecerán aquí',
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildUpcomingAppointments() {
-    if (_upcomingAppointments.isEmpty) {
+  Widget _buildAppointmentList(List<BarberAppointment> appointments,
+      {required String emptyTitle, required String emptySubtitle}) {
+    if (appointments.isEmpty) {
       return _buildEmptyState(
         icon: Icons.event_available,
-        title: 'No tienes citas programadas',
-        subtitle: '¡Reserva tu próxima cita ahora!',
+        title: emptyTitle,
+        subtitle: emptySubtitle,
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _upcomingAppointments.length,
-      itemBuilder: (context, index) {
-        final appointment = _upcomingAppointments[index];
-        return _buildAppointmentCard(appointment, isUpcoming: true);
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Provider.of<AppointmentProvider>(context, listen: false)
+            .loadAppointments();
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: appointments.length,
+        itemBuilder: (context, index) {
+          final appointment = appointments[index];
+          return _buildAppointmentCard(appointment);
+        },
+      ),
     );
   }
 
-  Widget _buildPastAppointments() {
-    if (_pastAppointments.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.history,
-        title: 'No tienes historial de citas',
-        subtitle: 'Tus citas pasadas aparecerán aquí',
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _pastAppointments.length,
-      itemBuilder: (context, index) {
-        final appointment = _pastAppointments[index];
-        return _buildAppointmentCard(appointment, isUpcoming: false);
-      },
-    );
-  }
-
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment,
-      {required bool isUpcoming}) {
-    final date = appointment['date'] as DateTime;
-    final status = appointment['status'] as String;
+  Widget _buildAppointmentCard(BarberAppointment appointment) {
+    final date = appointment.date;
+    final status = appointment.status;
 
     Color statusColor;
     String statusText;
     IconData statusIcon;
 
     switch (status) {
+      case 'confirmada':
       case 'confirmed':
         statusColor = Colors.green;
         statusText = 'Confirmada';
         statusIcon = Icons.check_circle;
         break;
+      case 'pendiente':
       case 'pending':
         statusColor = Colors.orange;
         statusText = 'Pendiente';
         statusIcon = Icons.schedule;
         break;
+      case 'completado':
       case 'completed':
         statusColor = Colors.blue;
         statusText = 'Completada';
         statusIcon = Icons.done_all;
         break;
+      case 'cancelado':
       case 'cancelled':
         statusColor = Colors.red;
         statusText = 'Cancelada';
         statusIcon = Icons.cancel;
+        break;
+      case 'en_ejecucion':
+        statusColor = Colors.purple;
+        statusText = 'En ejecución';
+        statusIcon = Icons.play_circle;
         break;
       default:
         statusColor = Colors.grey;
         statusText = 'Desconocido';
         statusIcon = Icons.help;
     }
+
+    final appointmentMap = {
+      'id': appointment.id,
+      'service': appointment.service,
+      'barber': 'Barbero ${appointment.barberId}',
+      'date': appointment.date,
+      'time': appointment.hour,
+      'status': appointment.status,
+    };
+
+    final isUpcoming = appointment.status == 'pendiente' ||
+        appointment.status == 'pending' ||
+        appointment.status == 'confirmada' ||
+        appointment.status == 'confirmed' ||
+        appointment.status == 'en_ejecucion';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -199,9 +189,10 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header con estado
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
@@ -219,96 +210,57 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${date.day}/${date.month}/${date.year}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-
-          // Contenido
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.content_cut,
-                        color: AppTheme.primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appointment['service'],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.person, size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text(
-                                appointment['barber'],
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text(
-                                appointment['time'],
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '\$${appointment['price']}',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                  ],
+                Text(
+                  appointment.service.isNotEmpty
+                      ? appointment.service
+                      : 'Servicio desconocido',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-
-                // Botones de acción (solo para citas próximas)
-                if (isUpcoming && status != 'cancelled') ...[
+                const SizedBox(height: 8),
+                Text(
+                  '${DateFormat('dd/MM/yyyy').format(date)} · ${appointment.hour}',
+                ),
+                const SizedBox(height: 8),
+                Text('Barbero: ${appointment.barberId}'),
+                const SizedBox(height: 4),
+                if (appointment.products.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Productos:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  ...appointment.products.map(
+                    (product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '${product.name} x${product.quantity} - \$${product.unitPrice}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ),
+                ],
+                if (appointment.products.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Sin productos adicionales',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+                if (isUpcoming && status != 'cancelado' && status != 'cancelled') ...[
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
@@ -340,9 +292,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
                     ],
                   ),
                 ],
-
-                // Botón de reseña (solo para citas completadas)
-                if (!isUpcoming && status == 'completed') ...[
+                if (!isUpcoming &&
+                    (status == 'completed' || status == 'completado')) ...[
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
@@ -407,7 +358,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     );
   }
 
-  void _modifyAppointment(Map<String, dynamic> appointment) async {
+  void _modifyAppointment(BarberAppointment appointment) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -416,14 +367,6 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     );
 
     if (result != null && mounted) {
-      setState(() {
-        appointment['date'] = result['date'];
-        appointment['time'] = result['time'];
-        appointment['barber'] = result['barber'];
-        // Cambiamos el estado de pending/confirmed a pending por si requiere re-confirmación, 
-        // o lo dejamos igual. Asumiremos que se mantiene confirmado o pendiente.
-      });
-      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cita actualizada exitosamente'),
@@ -433,7 +376,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     }
   }
 
-  void _cancelAppointment(Map<String, dynamic> appointment) {
+  void _cancelAppointment(BarberAppointment appointment) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -445,8 +388,8 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
           ],
         ),
         content: Text(
-          '¿Estás seguro de que deseas cancelar tu cita de ${appointment['service']} '
-          'el ${(appointment['date'] as DateTime).day}/${(appointment['date'] as DateTime).month}?',
+          '¿Estás seguro de que deseas cancelar tu cita de ${appointment.service} '
+          'el ${DateFormat('dd/MM/yyyy').format(appointment.date)}?',
         ),
         actions: [
           TextButton(
@@ -454,10 +397,10 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
             child: const Text('No'),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                appointment['status'] = 'cancelled';
-              });
+            onPressed: () async {
+              final provider =
+                  Provider.of<AppointmentProvider>(context, listen: false);
+              await provider.deleteAppointment(appointment.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -477,7 +420,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
     );
   }
 
-  void _rateAppointment(Map<String, dynamic> appointment) {
+  void _rateAppointment(BarberAppointment appointment) {
     int rating = 0;
 
     showDialog(
@@ -490,7 +433,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '¿Cómo fue tu experiencia con ${appointment['barber']}?',
+                  '¿Cómo fue tu experiencia con el barbero ${appointment.barberId}?',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),

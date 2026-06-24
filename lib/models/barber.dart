@@ -2,13 +2,17 @@ class Barber {
   final int id;
   final String name;
   final String specialty;
-  final bool available;
+  final String phone;
+  final String email;
+  final String status;
 
   Barber({
     required this.id,
     required this.name,
     required this.specialty,
-    required this.available,
+    required this.phone,
+    required this.email,
+    required this.status,
   });
 
   factory Barber.fromJson(Map<String, dynamic> json) {
@@ -16,7 +20,9 @@ class Barber {
       id: json['id'],
       name: json['name'],
       specialty: json['specialty'],
-      available: json['available'],
+      phone: json['phone'] ?? '',
+      email: json['email'] ?? '',
+      status: json['status'] ?? 'active',
     );
   }
 
@@ -25,7 +31,9 @@ class Barber {
       'id': id,
       'name': name,
       'specialty': specialty,
-      'available': available,
+      'phone': phone,
+      'email': email,
+      'status': status,
     };
   }
 }

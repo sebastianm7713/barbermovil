@@ -104,35 +104,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
               CustomButton(
                 text: "Iniciar sesión",
-                onPressed: () {
+                onPressed: () async {
                   final email = emailController.text.trim();
                   final password = passwordController.text.trim();
 
-                  final user = authProvider.login(email, password);
+                  final user = await authProvider.login(email, password);
 
                   if (user == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Credenciales incorrectas"),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Credenciales incorrectas"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                     return;
                   }
 
                   // 🔁 Redirección según rol
-                  switch (user.role) {
-                    case "admin":
-                      context.go("/admin/dashboard");
-                      break;
-                    case "employee":
-                      context.go("/employee/home");
-                      break;
-                    case "client":
-                      context.go("/client/home");
-                      break;
-                    default:
-                      context.go("/login");
+                  if (mounted) {
+                    switch (user.role) {
+                      case "admin":
+                        context.go("/admin/dashboard");
+                        break;
+                      case "employee":
+                        context.go("/employee/home");
+                        break;
+                      case "client":
+                        context.go("/client/home");
+                        break;
+                      default:
+                        context.go("/login");
+                    }
                   }
                 },
               ),

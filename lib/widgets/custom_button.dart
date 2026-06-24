@@ -3,13 +3,13 @@ import '../core/app_theme.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isPrimary;
 
   const CustomButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.isPrimary = true,
   });
 
@@ -21,8 +21,8 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: isPrimary
-              ? AppTheme.primary
-              : Colors.grey.shade800,
+              ? (onPressed != null ? AppTheme.primary : Colors.grey)
+              : (onPressed != null ? Colors.grey.shade800 : Colors.grey.shade500),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),

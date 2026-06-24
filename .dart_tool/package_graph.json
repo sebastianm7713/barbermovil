@@ -51,7 +51,7 @@
     },
     {
       "name": "google_fonts",
-      "version": "6.3.2",
+      "version": "8.0.2",
       "dependencies": [
         "crypto",
         "flutter",
@@ -61,7 +61,7 @@
     },
     {
       "name": "go_router",
-      "version": "14.8.1",
+      "version": "17.2.2",
       "dependencies": [
         "collection",
         "flutter",
@@ -72,23 +72,24 @@
     },
     {
       "name": "cupertino_icons",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "dependencies": []
     },
     {
       "name": "flutter_local_notifications",
-      "version": "17.2.4",
+      "version": "20.1.0",
       "dependencies": [
         "clock",
         "flutter",
         "flutter_local_notifications_linux",
         "flutter_local_notifications_platform_interface",
+        "flutter_local_notifications_windows",
         "timezone"
       ]
     },
     {
       "name": "table_calendar",
-      "version": "3.0.9",
+      "version": "3.2.0",
       "dependencies": [
         "flutter",
         "intl",
@@ -97,7 +98,7 @@
     },
     {
       "name": "intl",
-      "version": "0.18.1",
+      "version": "0.20.2",
       "dependencies": [
         "clock",
         "meta",
@@ -106,7 +107,7 @@
     },
     {
       "name": "shared_preferences",
-      "version": "2.5.3",
+      "version": "2.5.5",
       "dependencies": [
         "flutter",
         "shared_preferences_android",
@@ -119,7 +120,7 @@
     },
     {
       "name": "dio",
-      "version": "5.9.0",
+      "version": "5.9.2",
       "dependencies": [
         "async",
         "collection",
@@ -167,14 +168,14 @@
     },
     {
       "name": "json_annotation",
-      "version": "4.9.0",
+      "version": "4.11.0",
       "dependencies": [
         "meta"
       ]
     },
     {
       "name": "image",
-      "version": "4.6.0",
+      "version": "4.8.0",
       "dependencies": [
         "archive",
         "meta",
@@ -264,7 +265,7 @@
     },
     {
       "name": "image_picker_android",
-      "version": "0.8.13+10",
+      "version": "0.8.13+16",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -324,22 +325,34 @@
     },
     {
       "name": "timezone",
-      "version": "0.9.4",
+      "version": "0.10.1",
       "dependencies": [
+        "http",
         "path"
       ]
     },
     {
       "name": "flutter_local_notifications_platform_interface",
-      "version": "7.2.0",
+      "version": "10.0.0",
       "dependencies": [
-        "flutter",
         "plugin_platform_interface"
       ]
     },
     {
+      "name": "flutter_local_notifications_windows",
+      "version": "2.0.1",
+      "dependencies": [
+        "ffi",
+        "flutter",
+        "flutter_local_notifications_platform_interface",
+        "meta",
+        "timezone",
+        "xml"
+      ]
+    },
+    {
       "name": "flutter_local_notifications_linux",
-      "version": "4.0.1",
+      "version": "7.0.0",
       "dependencies": [
         "dbus",
         "ffi",
@@ -385,7 +398,7 @@
     },
     {
       "name": "shared_preferences_platform_interface",
-      "version": "2.4.1",
+      "version": "2.4.2",
       "dependencies": [
         "flutter",
         "plugin_platform_interface"
@@ -413,7 +426,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "version": "2.4.17",
+      "version": "2.4.23",
       "dependencies": [
         "flutter",
         "shared_preferences_platform_interface"
@@ -421,7 +434,7 @@
     },
     {
       "name": "dio_web_adapter",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "dependencies": [
         "dio",
         "http_parser",
@@ -446,7 +459,7 @@
     },
     {
       "name": "async",
-      "version": "2.13.0",
+      "version": "2.13.1",
       "dependencies": [
         "collection",
         "meta"
@@ -490,7 +503,7 @@
     },
     {
       "name": "source_span",
-      "version": "1.10.1",
+      "version": "1.10.2",
       "dependencies": [
         "collection",
         "path",
@@ -508,9 +521,8 @@
     },
     {
       "name": "archive",
-      "version": "4.0.7",
+      "version": "4.0.9",
       "dependencies": [
-        "crypto",
         "path",
         "posix"
       ]
@@ -543,7 +555,7 @@
     },
     {
       "name": "cross_file",
-      "version": "0.3.5+1",
+      "version": "0.3.5+2",
       "dependencies": [
         "meta",
         "web"
@@ -574,7 +586,7 @@
     },
     {
       "name": "flutter_plugin_android_lifecycle",
-      "version": "2.0.33",
+      "version": "2.0.34",
       "dependencies": [
         "flutter"
       ]
@@ -619,9 +631,11 @@
     },
     {
       "name": "path_provider_android",
-      "version": "2.2.22",
+      "version": "2.3.1",
       "dependencies": [
         "flutter",
+        "jni",
+        "jni_flutter",
         "path_provider_platform_interface"
       ]
     },
@@ -633,22 +647,21 @@
       ]
     },
     {
-      "name": "xdg_directories",
-      "version": "0.2.0+3",
-      "dependencies": [
-        "meta",
-        "path",
-        "process"
-      ]
-    },
-    {
       "name": "ffi",
-      "version": "2.1.4",
+      "version": "2.2.0",
       "dependencies": []
     },
     {
+      "name": "xdg_directories",
+      "version": "1.1.0",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
       "name": "dbus",
-      "version": "0.7.11",
+      "version": "0.7.12",
       "dependencies": [
         "args",
         "ffi",
@@ -658,7 +671,7 @@
     },
     {
       "name": "file",
-      "version": "6.1.4",
+      "version": "7.0.1",
       "dependencies": [
         "meta",
         "path"
@@ -671,7 +684,7 @@
     },
     {
       "name": "petitparser",
-      "version": "7.0.1",
+      "version": "7.0.2",
       "dependencies": [
         "collection",
         "meta"
@@ -679,7 +692,7 @@
     },
     {
       "name": "posix",
-      "version": "6.0.3",
+      "version": "6.5.0",
       "dependencies": [
         "ffi",
         "meta",
@@ -692,12 +705,31 @@
       "dependencies": []
     },
     {
-      "name": "process",
-      "version": "4.2.4",
+      "name": "jni_flutter",
+      "version": "1.0.1",
       "dependencies": [
-        "file",
+        "flutter",
+        "jni"
+      ]
+    },
+    {
+      "name": "jni",
+      "version": "1.0.0",
+      "dependencies": [
+        "args",
+        "collection",
+        "ffi",
+        "meta",
+        "package_config",
         "path",
-        "platform"
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "package_config",
+      "version": "2.2.0",
+      "dependencies": [
+        "path"
       ]
     }
   ],

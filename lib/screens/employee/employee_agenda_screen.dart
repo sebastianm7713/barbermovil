@@ -242,11 +242,14 @@ class _EmployeeAgendaScreenState extends State<EmployeeAgendaScreen> {
                     id: appointment?.id ?? DateTime.now().millisecondsSinceEpoch,
                     clientId: selectedClientId!,
                     barberId: 1,
+                    serviceId: selectedService!.id,
                     date: selectedDate,
                     hour:
                         "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}",
                     service: selectedService!.name,
+                    serviceImageUrl: appointment?.serviceImageUrl ?? '',
                     status: appointment?.status ?? "pending",
+                    products: appointment?.products ?? const [],
                   );
 
                   if (appointment == null) {

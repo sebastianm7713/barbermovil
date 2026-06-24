@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/app_theme.dart';
 import '../../models/product.dart';
-import '../../mock/mock_products.dart';
+import '../../providers/product_provider.dart';
 
 class ManageProductsScreen extends StatefulWidget {
   const ManageProductsScreen({super.key});
@@ -11,105 +12,117 @@ class ManageProductsScreen extends StatefulWidget {
 }
 
 class _ManageProductsScreenState extends State<ManageProductsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load products when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      if (productProvider.products.isEmpty && !productProvider.isLoading) {
+        productProvider.loadProducts();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text("Productos"),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-      ),
+    return Consumer<ProductProvider>(
+      builder: (context, productProvider, child) {
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          appBar: AppBar(
+            title: const Text("Productos"),
+            backgroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
+          ),
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.add),
-        onPressed: () => _openForm(),
-      ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: AppTheme.primary,
+            child: const Icon(Icons.add),
+            onPressed: () => _openForm(context),
+          ),
 
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: mockProducts.length,
-        itemBuilder: (_, index) {
-          final product = mockProducts[index];
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  /// 🖼️ IMAGEN
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      product.imageUrl,
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  /// INFO
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+          body: productProvider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : productProvider.products.isEmpty
+                  ? const Center(child: Text("No hay productos disponibles."))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: productProvider.products.length,
+                      itemBuilder: (context, index) {
+                        final product = productProvider.products[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: product.imageUrl.isNotEmpty
+                                ? Image.network(product.imageUrl, width: 50, height: 50, fit: BoxFit.cover)
+                                : const Icon(Icons.inventory, size: 50),
+                            title: Text(product.name),
+                            subtitle: Text(
+                              "\nPrecio: \$${product.price.toString()} | Stock: ${product.stock}",
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _openForm(context, edit: product),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _deleteProduct(context, product),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(product.description),
-                        const SizedBox(height: 4),
-                        Text(
-                          "\$${product.price} · Stock: ${product.stock}",
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        Text(
-                          "Categoría: ${product.category}",
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
+        );
+      },
+    );
+  }
 
-                  /// ACCIONES
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _openForm(edit: product),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            mockProducts.removeAt(index);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+  void _deleteProduct(BuildContext context, Product product) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Eliminar producto"),
+        content: Text("¿Estás seguro de que quieres eliminar '${product.name}'?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final productProvider = Provider.of<ProductProvider>(context, listen: false);
+              final success = await productProvider.deleteProduct(product.id);
+              Navigator.pop(context);
+              if (success) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Producto eliminado')),
+                  );
+                }
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Error al eliminar producto')),
+                  );
+                }
+              }
+            },
+            child: const Text("Eliminar"),
+          ),
+        ],
       ),
     );
   }
 
-  /// 🧾 FORM CREAR / EDITAR
-  void _openForm({Product? edit}) {
+  /// ?? FORM CREAR / EDITAR
+  void _openForm(BuildContext context, {Product? edit}) {
+    final productProvider = Provider.of<ProductProvider>(context, listen: false);
     final nameCtrl = TextEditingController(text: edit?.name);
     final descCtrl = TextEditingController(text: edit?.description);
     final priceCtrl = TextEditingController(text: edit?.price.toString());
@@ -123,13 +136,14 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
         title: Text(edit == null ? "Nuevo producto" : "Editar producto"),
         content: SingleChildScrollView(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Nombre")),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Descripción")),
+              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Descripci�n")),
               TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Precio")),
               TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Stock")),
-              TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: "Categoría")),
-              TextField(controller: imageCtrl, decoration: const InputDecoration(labelText: "Imagen (asset)")),
+              TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: "Categor�a")),
+              TextField(controller: imageCtrl, decoration: const InputDecoration(labelText: "Imagen (URL o asset)")),
             ],
           ),
         ),
@@ -139,30 +153,34 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
             child: const Text("Cancelar"),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                if (edit == null) {
-                  mockProducts.add(
-                    Product(
-                      id: mockProducts.length + 1,
-                      name: nameCtrl.text,
-                      description: descCtrl.text,
-                      price: int.parse(priceCtrl.text),
-                      stock: int.parse(stockCtrl.text),
-                      category: categoryCtrl.text,
-                      imageUrl: imageCtrl.text,
-                    ),
+            onPressed: () async {
+              final product = Product(
+                id: edit?.id ?? 0,
+                name: nameCtrl.text,
+                description: descCtrl.text,
+                price: int.tryParse(priceCtrl.text) ?? 0,
+                stock: int.tryParse(stockCtrl.text) ?? 0,
+                category: categoryCtrl.text,
+                imageUrl: imageCtrl.text,
+              );
+
+              bool success;
+              if (edit == null) {
+                success = await productProvider.createProduct(product);
+              } else {
+                success = await productProvider.updateProduct(edit.id, product);
+              }
+
+              if (success) {
+                Navigator.pop(context);
+              } else {
+                // Show error message
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(edit == null ? 'Error al crear producto' : 'Error al actualizar producto')),
                   );
-                } else {
-                  edit.name = nameCtrl.text;
-                  edit.description = descCtrl.text;
-                  edit.price = int.parse(priceCtrl.text);
-                  edit.stock = int.parse(stockCtrl.text);
-                  edit.category = categoryCtrl.text;
-                  edit.imageUrl = imageCtrl.text;
                 }
-              });
-              Navigator.pop(context);
+              }
             },
             child: const Text("Guardar"),
           ),
